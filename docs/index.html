@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Classification and Segmentation</title>
+    </head>
+    <body>
+        <h1>Classifcation and Segmentation</h1>
+        <h2>Classification</h2>
+        <p>
+            I trained a convolutional neural network to classify the <code>torchvision.datasets.FashionMNIST</code> dataset.
+        </p>
+        <p>
+            At first, I used two conv layers with 32 channels, but I found increasing the conv layers to 64 channels improved accuracy. I also found that the ReLU non-linearity produced sufficient results.
+        </p>
+        <p>
+            I used cross entropy loss (<code>torch.nn.CrossEntropyLoss</code>) as the loss function, and I used SGD (<code>torch.optim.SGD</code>) with a learning rate of 0.001 and momentum 0.9 as the optimizer for 30 epochs. I followed this PyTorch <a href="https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html#training-on-gpu">tutorial</a>.
+        </p>
+        <img src="images/class-val-vs-train-acc.png">
+        <table>
+            <tr>
+                <td>Class</td>
+                <td>Validation Accuracy</td>
+                <td>Test Accuracy</td>
+            </tr>
+            <tr>
+                <td>T-shirt/top</td>
+                <td>0.88414634</td>
+                <td>0.88582677</td>
+            </tr>
+            <tr>
+                <td>trouser</td>
+                <td>0.97540984</td>
+                <td>0.98632812</td>
+            </tr>
+            <tr>
+                <td>pullover</td>
+                <td>0.84939759</td>
+                <td>0.86653386</td>
+            </tr>
+            <tr>
+                <td>dress</td>
+                <td>0.94214876</td>
+                <td>0.90891473</td>
+            </tr>
+            <tr>
+                <td>coat</td>
+                <td>0.87070707</td>
+                <td>0.86732673</td>
+            </tr>
+            <tr>
+                <td>sandal</td>
+                <td>0.96856582</td>
+                <td>0.97759674</td>
+            </tr>
+            <tr>
+                <td>shirt</td>
+                <td>0.75841584</td>
+                <td>0.74141414</td>
+            </tr>
+            <tr>
+                <td>sneaker</td>
+                <td>0.97826087</td>
+                <td>0.97368421</td>
+            </tr>
+            <tr>
+                <td>bag</td>
+                <td>0.9765625</td>
+                <td>0.9795082</td>
+            </tr>
+            <tr>
+                <td>ankle boot</td>
+                <td>0.97260274</td>
+                <td>0.96523517</td>
+            </tr>
+        </table>
+        <p>The model had the trouble with the shirt class. This make sense, as the other lowest classes (below 0.90) which are the tops, pullovers, coats have similar structure / are visually very similar.</p>
+        <img src=images/class-samples.png>
+        <p>
+            I visualized the learn filters. Since the second convolutional layer has 64 channels, I limited it to the first channel.
+        </p>
+        <table>
+            <tr>
+                <td>conv1</td>
+                <td>conv2</td>
+            </tr>
+            <tr>
+                <td><img src="images/conv1-filters.png"></td>
+                <td><img src="images/conv2-filters.png"></td>
+            </tr>
+        </table>
+        <p>
+            Given more time, I would like to play more with paramters a bit and research better ways to speed up training, which took a very long time. I would also like to see what happens if I add more layers.
+        </p>
+        <h2>Segmentation</h2>
+        <p>
+            I trained another convlutionalnerual network to classify the <code>FacadeDataset</code> dataset. I split the training set into 800 images for training and 105 for validation.
+        </p>
+        <p>
+            This network consists of 6 convolutional layers of size 3*3 kernels, each followed by a batch norm layer with momentum 0.01 and ReLU layer. The structure of the network takes inspiration from <a href="https://arxiv.org/pdf/1505.04597.pdf">U-net</a> and <a href="https://github.com/HRNet/HRNet-Semantic-Segmentation">HRNet-Semantic-Segmentation</a>.
+        </p>
+        <p>
+            I used cross entropy loss (<code>torch.nn.CrossEntropyLoss</code>) as the loss function, and I used Adam (<code>torch.optim.Adam</code>) as the optimizer with a learning rate of 1e-3 and weight decay of 1e-5. I then trained the net for 30 epochs.
+        </p>
+        <table>
+            <tr>
+                <td>Layer no.</td>
+                <td>In planes</td>
+                <td>Out planes</td>
+                <td>Kernel size</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>3</td>
+                <td>32</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>32</td>
+                <td>64</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>64</td>
+                <td>128</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>128</td>
+                <td>64</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>64</td>
+                <td>32</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>32</td>
+                <td>5</td>
+                <td>3</td>
+            </tr>
+        </table>
+        <img src="images/seg-val-vs-train-loss.png">
+        <p>After training the model, I ran the model on the test set.</p>
+        <table>
+            <tr>
+                <td>Class</td>
+                <td>AP</td>
+                <td>Color</td>
+            </tr>
+            <tr>
+                <td>others</td>
+                <td>0.6209907273481369</td>
+                <td>black</td>
+            </tr>
+            <tr>
+                <td>facade</td>
+                <td>0.7094149405150957</td>
+                <td>blue</td>
+            </tr>
+            <tr>
+                <td>pillar</td>
+                <td>0.12481656878202824</td>
+                <td>green</td>
+            </tr>
+            <tr>
+                <td>window</td>
+                <td>0.7793396781016136</td>
+                <td>orange</td>
+            </tr>
+            <tr>
+                <td>balcony</td>
+                <td>0.3962888810281849</td>
+                <td>red</td>
+            </tr>
+            <tr>
+                <td>
+                    average
+                </td>
+                <td>
+                    0.52617015916
+                </td>
+            </tr>
+        </table>
+        <p>
+            I ran the net on this image from I took in London, Spring 2014.
+        </p>
+        <table>
+            <td><img src="images/london.JPG"></td>
+            <td><img src="images/london.png"></td>
+            <td>Looks a bit like a Jackson Pollock painting. It did best on the middle building, where it generally got the walls and the windows, but it didn't do as well for the other buildings, where it failed to recognize any balcony for the right building and turned most of the building into window. I think this also might have to do with the way the results are visualized, where we simply ask if the output value is >0.5 to determine existence. The middle building is the straightest and the other two are slightly angled, and all the training data is perfectly straight. </td>
+        </table>
+        <table>
+            <tr>
+                <td>Image</td>
+                <td>Ground Truth</td>
+                <td>Prediction</td>
+            </tr>
+            <tr>
+                <td><img src="images/x106.png"></td>
+                <td><img src="images/gt106.png"></td>
+                <td><img src="images/y106.png"></td>
+            </tr>
+            <tr>
+                <td><img src="images/x111.png"></td>
+                <td><img src="images/gt111.png"></td>
+                <td><img src="images/y111.png"></td>
+            </tr>
+            <tr>
+                <td><img src="images/x113.png"></td>
+                <td><img src="images/gt113.png"></td>
+                <td><img src="images/y113.png"></td>
+            </tr>
+        </table>
+        <p>
+            I noticed that other people's models produced better looking pictures at similar average AP's. Given enough time, I would like to fine tune my model or visualizer to produce better outcome.
+        </p>
+    </body>
+</html>
